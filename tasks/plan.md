@@ -12,9 +12,11 @@ Never load 2 GPU engines at once (8GB VRAM rule). Unload between stages.
 - Ollama Qwen2.5-7B-Q4 script provider; Kokoro-82M default TTS; Piper fallback; XTTS clone path behind flag.
 - Verify: 450-word script -> wav, same voice id twice = same voice; LUFS check.
 
-## Phase 2 - Avatar slice (flag: musetalk | sadtalker | latentsync)
-- Default `musetalk` fp16 @720p. Others implement same `IAvatarRenderer` interface.
-- Verify: 15-sec clip lip-sync sanity + <10 min on RTX 3070; interface swap needs no pipeline change.
+## Phase 2 - Avatar slice (flag: musetalk | sadtalker256 | latentsync | ffmpeg_slideshow)
+- T4a `musetalk` fp16 @720p: lip-sync only (expression score 1). Realtime-class, tested on 4GB laptop GPUs. Daily default.
+- T4b `sadtalker256` (SadTalker-Unlocked, 256px, no GFPGAN, still mode): lip + head motion + emotion from audio prosody (score 2). ~40s per 11s audio => ~11 min per 3-min video on 8GB. 512px+GFPGAN excluded (peaks 8.2GB+, OOM).
+- Both implement `IAvatarRenderer`; swap needs no pipeline change.
+- Verify: 15-sec clip lip-sync sanity + expression-variance check (facial landmark motion std > static baseline); time budget recorded.
 
 ## Phase 3 - Compose slice (subs + assembly + thumbnail)
 - faster-whisper base/small -> srt -> FFmpeg burn-in + B-roll + thumb.

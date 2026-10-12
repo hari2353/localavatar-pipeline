@@ -8,6 +8,8 @@
 - [ ] T2 real script provider (Ollama) behind flag
 - [ ] T3 real TTS provider (Kokoro default) behind flag
 - [ ] T4 real avatar provider (MuseTalk default) behind flag
+- [ ] T4a expressive avatar: musetalk (lip-sync, score 1) then sadtalker256 Unlocked (lip+motion+emotion, score 2, ~11 min/3-min video); 512px+GFPGAN excluded (OOM on 8GB)
+- [ ] T4b expression judging: landmark-motion-std check vs static baseline in harness
 - [ ] T5 compose slice (whisper + ffmpeg) real
 - [ ] T6 optional VLM gate + video-LLM B-roll (both default OFF)
 - [ ] T7 daily Task Scheduler job + docs + first public commit/push
