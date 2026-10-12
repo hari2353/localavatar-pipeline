@@ -6,8 +6,10 @@ from src.providers import studio as s
 
 def test_template_script_word_budget():
     sc = s.TemplateScriptProvider().generate("tech facts", minutes=1, seed=1)
-    assert 120 <= len(sc.full_text.split()) <= 220
+    assert 90 <= len(sc.full_text.split()) <= 150
     assert sc.sections == ["hook", "body", "cta"]
+    sc3 = s.TemplateScriptProvider().generate("tech facts", minutes=3, seed=1)
+    assert 300 <= len(sc3.full_text.split()) <= 400  # ~3 min at measured SAPI pace
 
 
 def test_sapi_speaks_short_line(tmp_path):
