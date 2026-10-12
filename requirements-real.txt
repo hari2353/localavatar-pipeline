@@ -12,4 +12,13 @@ pillow
 pyyaml
 pytest
 # Next (T2-T6, uncomment when landing): ollama server + qwen2.5:7b-instruct-q4_K_M,
-# kokoro-82m, piper-tts, faster-whisper, musetalk (fp16), sadtalker-unlocked (256px, no gfpgan)
+# kokoro-82m, piper-tts, faster-whisper, sadtalker-unlocked (256px, no gfpgan)
+
+# --- envs/musetalk (independent venv, own torch; mmpose/mmcv replaced by src/vendor shims) ---
+# .\envs\musetalk\Scripts\python -m pip install torch --index-url https://download.pytorch.org/whl/cu121
+# then: diffusers==0.30.2 transformers==4.39.2 accelerate==0.28.0 opencv-python==4.9.0.80
+#   soundfile==0.12.1 librosa==0.11.0 einops==0.8.1 omegaconf ffmpeg-python "moviepy"
+#   "imageio[ffmpeg]" onnxruntime-gpu==1.17.1 openai-whisper gdown requests pillow pyyaml
+#   numpy==1.26.4 (NOT 2.x: breaks cv2 4.9) torchvision (cu121) face-detection
+#   mmengine "mediapipe==0.10.14" (NOT newer: solutions API removed)
+# weights: models/musetalk/models/{musetalkV15/unet.pth,sd-vae,whisper-tiny,dwpose,syncnet,face-parse-bisent}
