@@ -65,9 +65,14 @@ def test_compositor_auto_select():
                 "avatar_renderer": "mock", "avatar_maker": "mock",
                 "broll_provider": "none", "enhancer": "none"}
     eng_studio = dict(eng_mock, tts_provider="sapi")
+    eng_new = {"script_provider": "ollama_qwen", "tts_provider": "piper",
+               "avatar_renderer": "musetalk", "avatar_maker": "none",
+               "broll_provider": "none", "enhancer": "none"}
     from src.providers import mock as m
     assert isinstance(factory.make_compositor(eng_mock), m.MockCompositor)
     assert isinstance(factory.make_compositor(eng_studio), s.CopyCompositor)
+    # regression: every real engine flag must yield real output, never mock bytes
+    assert isinstance(factory.make_compositor(eng_new), s.CopyCompositor)
     assert isinstance(s.CopyCompositor(), ICompositor)
 
 

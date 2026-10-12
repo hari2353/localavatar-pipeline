@@ -74,8 +74,12 @@ def make_quality_gate(enabled: bool, model: str):
 
 
 def make_compositor(eng: dict):
-    """Studio tier (any template/sapi/pillow_face/ffmpeg_slideshow flag) -> real copy; else mock bytes."""
+    """Real copy whenever ANY engine is real; mock bytes only for all-mock runs.
+
+    (Never allowlist real flags — a new engine must fail loud toward real output,
+    not silently toward placeholder bytes.)
+    """
     from .providers import mock as m, studio as s
-    if set(eng.values()) & s.STUDIO_ENGINES:
-        return s.CopyCompositor()
-    return m.MockCompositor()
+    if all(v in ("mock", "none") for v in eng.values()):
+        return m.MockCompositor()
+    return s.CopyCompositor()

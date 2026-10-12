@@ -14,8 +14,6 @@ from pathlib import Path
 from ..interfaces import (AudioTrack, IAvatarMaker, IAvatarRenderer, ICompositor,
                           IScriptProvider, ITTSProvider, Script, VideoClip)
 
-STUDIO_ENGINES = {"template", "sapi", "pillow_face", "sd15_face", "ffmpeg_slideshow"}
-
 WORDS_PER_MIN = 115  # calibrated to SAPI David @Rate 0 (~117 wpm measured)
 
 
