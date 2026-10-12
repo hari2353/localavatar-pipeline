@@ -35,6 +35,8 @@ def make_avatar_maker(flag: str):
         return m.ExistingFileAvatarMaker()
     if flag == "pillow_face":
         return s.PillowFaceMaker()
+    if flag == "sd15_face":
+        return s.SD15FaceMaker()
     if flag != "mock":
         raise NotImplementedError(f"avatar-maker engine {flag!r} lands in T6")
     return m.MockAvatarMaker()

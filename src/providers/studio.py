@@ -14,7 +14,7 @@ from pathlib import Path
 from ..interfaces import (AudioTrack, IAvatarMaker, IAvatarRenderer, ICompositor,
                           IScriptProvider, ITTSProvider, Script, VideoClip)
 
-STUDIO_ENGINES = {"template", "sapi", "pillow_face", "ffmpeg_slideshow"}
+STUDIO_ENGINES = {"template", "sapi", "pillow_face", "sd15_face", "ffmpeg_slideshow"}
 
 WORDS_PER_MIN = 115  # calibrated to SAPI David @Rate 0 (~117 wpm measured)
 
@@ -83,6 +83,27 @@ class PillowFaceMaker(IAvatarMaker):
         d.ellipse([560, 230, 720, 390], fill=(240, 200, 160))
         d.text((500, 580), f"AI HOST #{seed}", fill=(255, 255, 255))
         img.save(out_png)
+        return out_png
+
+
+class SD15FaceMaker(IAvatarMaker):
+    """Photorealistic human face via local SD 1.5. Needs .venv + models/sd15 (see scripts/make_host_face.py)."""
+    name = "sd15_face"
+
+    def ensure(self, out_png: Path, seed: int = 42) -> Path:
+        import subprocess
+        import sys
+        out_png.parent.mkdir(parents=True, exist_ok=True)
+        if out_png.exists():
+            return out_png
+        ROOT = Path(__file__).resolve().parents[2]
+        venv_py = ROOT / ".venv" / "Scripts" / "python.exe"
+        py = str(venv_py) if venv_py.exists() else sys.executable
+        r = subprocess.run([py, str(ROOT / "scripts" / "make_host_face.py"),
+                            "--out", str(out_png), "--seed", str(seed)],
+                           capture_output=True, text=True, timeout=3600)
+        if r.returncode != 0 or not out_png.exists():
+            raise RuntimeError(f"SD15 face gen failed (need .venv + model download): {r.stderr[-600:]}")
         return out_png
 
 

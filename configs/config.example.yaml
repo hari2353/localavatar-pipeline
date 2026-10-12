@@ -9,7 +9,7 @@ out_dir: "outputs"
 engines:
   script_provider: "mock"    # mock | template (real, no LLM) | ollama_qwen | ollama_llama
   tts_provider: "mock"       # mock | sapi (real offline Windows voice) | kokoro | xtts | piper
-  avatar_maker: "mock"       # none (strict) | mock | pillow_face (real PNG) | sd15_local (T6)
+  avatar_maker: "mock"       # none (strict) | mock | pillow_face (PNG card) | sd15_face (photoreal human, .venv) | sd15_local (T6)
   avatar_renderer: "mock"    # mock | ffmpeg_slideshow (real MP4) | musetalk | sadtalker | latentsync
   broll_provider: "none"     # none | mock | sd15_local | wan_5b | ltx
   enhancer: "none"           # none | gfpgan

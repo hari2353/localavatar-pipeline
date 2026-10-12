@@ -1,4 +1,15 @@
-# Real-engine deps (install ONLY on the render laptop, inside venv).
-# Kept separate so git clone + CI stay light. Versions pinned during T2-T6.
-# ollama (server) + qwen2.5:7b-instruct-q4_K_M
-# kokoro-82m, piper-tts, faster-whisper, musetalk (fp16), gfpgan, ffmpeg 6
+# Real-engine deps — install into project .venv (short paths avoid Win long-path failures):
+#   python -m venv --system-site-packages .venv
+#   .\.venv\Scripts\python -m pip install -r requirements-real.txt
+# Base env keeps torch 2.0.1+cu117 (reused via --system-site-packages, NOT reinstalled).
+diffusers==0.21.4
+transformers==4.35.2
+huggingface_hub==0.19.4
+accelerate==0.24.1
+safetensors
+numpy==1.26.4          # torch 2.0 needs numpy 1.x (base has 2.x -> "Numpy is not available")
+pillow
+pyyaml
+pytest
+# Next (T2-T6, uncomment when landing): ollama server + qwen2.5:7b-instruct-q4_K_M,
+# kokoro-82m, piper-tts, faster-whisper, musetalk (fp16), sadtalker-unlocked (256px, no gfpgan)
