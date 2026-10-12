@@ -4,6 +4,8 @@ models/
 outputs/
 voices/
 assets/host.png
+.venv/
+envs/
 *.wav
 *.mp4
 *.srt

@@ -24,8 +24,13 @@ def make_avatar_renderer(flag: str):
     from .providers import mock as m, studio as s
     if flag == "ffmpeg_slideshow":
         return s.FfmpegSlideshowRenderer()
+    if flag == "musetalk":
+        from .providers import expressive as e
+        return e.MuseTalkRenderer()
+    if flag in ("sadtalker", "latentsync"):
+        raise NotImplementedError(f"avatar engine {flag!r} lands in T4b (SPEC offset)")
     if flag != "mock":
-        raise NotImplementedError(f"avatar engine {flag!r} lands in T4")
+        raise NotImplementedError(f"avatar engine {flag!r} unknown")
     return m.MockAvatar()
 
 
