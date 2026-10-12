@@ -12,17 +12,20 @@ def run(cfg: dict, niche: str) -> dict:
     eng = cfg["engines"]
 
     script = factory.make_script_provider(eng["script_provider"]).generate(niche, minutes, seed)
+    language = cfg.get("tts", {}).get("language", "en")
     audio = factory.make_tts_provider(eng["tts_provider"]).synthesize(
         script, out / "voice.wav", cfg.get("tts", {}).get("voice_id", ""))
-    clip = factory.make_avatar_renderer(eng["avatar_renderer"]).render(
-        Path(cfg.get("host_image", "assets/host.png")), audio, out / "avatar.mp4")
+    host_path = factory.make_avatar_maker(eng["avatar_maker"]).ensure(
+        Path(cfg.get("host_image", "assets/host.png")), seed)
+    clip = factory.make_avatar_renderer(eng["avatar_renderer"]).render(host_path, audio, out / "avatar.mp4")
     broll = factory.make_broll_provider(eng["broll_provider"]).generate(script, out)
     gate = factory.make_quality_gate(cfg["vlm_quality_gate"]["enabled"], cfg["vlm_quality_gate"]["model"])
     accepted = gate.review(clip)
     final = out / "final.mp4"
     final.write_bytes(b"mock-mp4")
     (out / "subs.srt").write_text("1\n00:00:00,000 --> 00:00:02,000\n" + script.title + "\n")
-    meta = {"niche": niche, "minutes": minutes, "engines": eng,
+    meta = {"niche": niche, "minutes": minutes, "language": language,
+            "host_image": str(host_path), "engines": eng,
             "vlm_gate": cfg["vlm_quality_gate"], "accepted": accepted,
             "artifacts": [str(final), str(out / "subs.srt")]}
     import json

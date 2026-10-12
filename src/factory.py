@@ -23,6 +23,15 @@ def make_avatar_renderer(flag: str):
     return m.MockAvatar()
 
 
+def make_avatar_maker(flag: str):
+    from .providers import mock as m
+    if flag == "none":
+        return m.ExistingFileAvatarMaker()
+    if flag != "mock":
+        raise NotImplementedError(f"avatar-maker engine {flag!r} lands in T6")
+    return m.MockAvatarMaker()
+
+
 def make_broll_provider(flag: str):
     from .providers import mock as m
     if flag == "none":

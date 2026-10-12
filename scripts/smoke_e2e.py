@@ -27,6 +27,8 @@ def main():
         cfg["vlm_quality_gate"]["enabled"] = False
     tmp = Path(tempfile.mkdtemp())
     cfg["out_dir"] = args.out
+    # keep the repo tree clean: generated faces live under the smoke out dir
+    cfg["host_image"] = str(Path(cfg["out_dir"]) / "host.png")
     meta = run(cfg, args.niche)
     assert Path(cfg["out_dir"], "final.mp4").exists(), "smoke failed: no mp4"
     print(f"SMOKE OK ({args.niche}) -> {cfg['out_dir']}/final.mp4")

@@ -15,10 +15,16 @@ def main():
     ap.add_argument("--config", default="config.yaml")
     ap.add_argument("--niche", default="tech facts")
     ap.add_argument("--minutes", type=int, default=None)
+    ap.add_argument("--language", default=None, help="generic user input, e.g. en, ur, hi")
+    ap.add_argument("--host-image", default=None, help="generic user input: your host PNG (else avatar_maker flag decides)")
     args = ap.parse_args()
     cfg = load_config(args.config)
     if args.minutes:
         cfg["minutes"] = args.minutes
+    if args.language:
+        cfg.setdefault("tts", {})["language"] = args.language
+    if args.host_image:
+        cfg["host_image"] = args.host_image
     meta = run(cfg, args.niche)
     print(f"OK niche={meta['niche']} engines={meta['engines']} gate={meta['vlm_gate']} -> {meta['artifacts'][0]}")
 

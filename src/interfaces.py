@@ -35,6 +35,13 @@ class ITTSProvider(abc.ABC):
     def synthesize(self, script: Script, out_wav: Path, voice_id: str = "") -> AudioTrack: ...
 
 
+class IAvatarMaker(abc.ABC):
+    """Generates the host face PNG (user can also supply their own file)."""
+    name: str
+    @abc.abstractmethod
+    def ensure(self, out_png: Path, seed: int = 42) -> Path: ...
+
+
 class IAvatarRenderer(abc.ABC):
     name: str
     @abc.abstractmethod

@@ -8,6 +8,7 @@ VALID = {
     "script_provider": {"mock", "ollama_qwen", "ollama_llama"},
     "tts_provider": {"mock", "kokoro", "xtts", "piper"},
     "avatar_renderer": {"mock", "musetalk", "sadtalker", "latentsync"},
+    "avatar_maker": {"none", "mock", "sd15_local"},
     "broll_provider": {"none", "mock", "sd15_local", "wan_5b", "ltx"},
     "enhancer": {"none", "gfpgan"},
     "vlm_model": {"minicpm-v-2b", "qwen2.5-vl-3b-q4"},
@@ -37,7 +38,7 @@ def load_config(path: str | Path) -> dict:
 
 def validate(cfg: dict) -> None:
     eng = cfg["engines"]
-    for key in ("script_provider", "tts_provider", "avatar_renderer", "broll_provider", "enhancer"):
+    for key in ("script_provider", "tts_provider", "avatar_renderer", "avatar_maker", "broll_provider", "enhancer"):
         if eng[key] not in VALID[key]:
             raise ValueError(f"invalid {key}={eng[key]!r}, allowed={sorted(VALID[key])}")
     if cfg["vlm_quality_gate"]["model"] not in VALID["vlm_model"]:

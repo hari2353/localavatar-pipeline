@@ -9,6 +9,7 @@ out_dir: "outputs"
 engines:
   script_provider: "mock"    # mock | ollama_qwen | ollama_llama
   tts_provider: "mock"       # mock | kokoro | xtts | piper
+  avatar_maker: "mock"       # none (strict: you supply host_image) | mock (placeholder if missing) | sd15_local (local face gen, T6)
   avatar_renderer: "mock"    # mock | musetalk | sadtalker | latentsync
   broll_provider: "none"     # none | mock | sd15_local | wan_5b | ltx
   enhancer: "none"           # none | gfpgan
@@ -19,7 +20,7 @@ vlm_quality_gate:
 
 tts:
   voice_id: "af_heart"       # Kokoro fixed host voice
-  language: "en"
+  language: "en"             # generic user input: override via --language (e.g. en, ur, hi)
 
 video:
   width: 1280

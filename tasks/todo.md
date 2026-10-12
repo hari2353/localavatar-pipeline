@@ -3,7 +3,8 @@
 - [x] T0 scaffold git-ready + SPEC + flags + mock harness + CI
   - Acceptance: pytest green, smoke mock mp4 exists
   - Verify: `python -m pytest tests/ -q` + `python scripts/smoke_e2e.py --providers mock --seconds 15`
-- [ ] T1 answer SPEC Open Questions (niche, language, host face, broll v1)
+- [x] T0b unit + integration suites split (29 tests: tests/unit + tests/integration)
+- [x] T1 language/host-face generic inputs + IAvatarMaker module + B-roll docs
 - [ ] T2 real script provider (Ollama) behind flag
 - [ ] T3 real TTS provider (Kokoro default) behind flag
 - [ ] T4 real avatar provider (MuseTalk default) behind flag

@@ -1,7 +1,7 @@
 """Offline fakes: let the whole loop run end-to-end with zero GPU/downloads."""
 from pathlib import Path
 
-from ..interfaces import (AudioTrack, IBrollProvider, IAvatarRenderer, ICompositor,
+from ..interfaces import (AudioTrack, IAvatarMaker, IBrollProvider, IAvatarRenderer, ICompositor,
                           IQualityGate, IScriptProvider, ITTSProvider, Script, VideoClip)
 
 
@@ -48,3 +48,22 @@ class PassThroughGate(IQualityGate):
     name = "off"
     def review(self, clip: VideoClip) -> bool:
         return True
+
+
+class MockAvatarMaker(IAvatarMaker):
+    """Dev/CI double: reuses the user's PNG, or writes a placeholder if missing."""
+    name = "mock"
+    def ensure(self, out_png: Path, seed: int = 42) -> Path:
+        out_png.parent.mkdir(parents=True, exist_ok=True)
+        if not out_png.exists():
+            out_png.write_bytes(b"mock-face-seed-%d" % seed)
+        return out_png
+
+
+class ExistingFileAvatarMaker(IAvatarMaker):
+    """Flag `none`: strict mode, user must supply their own host PNG."""
+    name = "none"
+    def ensure(self, out_png: Path, seed: int = 42) -> Path:
+        if not out_png.exists():
+            raise FileNotFoundError(f"host image missing: {out_png} (supply your own or set avatar_maker: mock/sd15_local)")
+        return out_png

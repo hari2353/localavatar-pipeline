@@ -52,10 +52,10 @@ class ITTSProvider(abc.ABC):
 ```
 
 ## Testing Strategy (harness engineering)
-- `tests/test_flags.py`: every flag combo in example config validates; unknown engine rejected.
-- `tests/test_contracts.py`: every provider (incl. mocks) satisfies its ABC; returned files exist.
-- `tests/test_pipeline.py`: stage order script->tts->avatar->broll?->gate?->compose; VLM gate on/off both pass; VRAM rule = max 1 GPU provider resident (factory unloads between stages).
-- Coverage gate: harness must pass with `pip install -r requirements.txt` (no GPU wheels). Real-model tests are manual, checklist in tasks/plan.md.
+- `tests/unit/` — isolated, no pipeline: flag validation + env overrides, factory flag->class mapping (real engines assert `NotImplementedError` until their task lands), each mock vs its ABC, no-torch-at-import guard.
+- `tests/integration/` — mock e2e: full `pipeline.run` artifacts + meta, language/host-image passthrough, missing-face auto-create vs strict-`none` failure, B-roll variants, CLI via subprocess (`run_daily.py` flags, `smoke_e2e.py`).
+- Commands: `pytest tests/unit -q` (fast) | `pytest tests/integration -q` (loop) | `pytest tests/ -q` (gate before every commit).
+- Coverage gate: harness passes on `requirements.txt` alone (no GPU wheels). Real-model checks are manual, checklist in tasks/plan.md.
 
 ## Boundaries
 - Always: run `pytest` before commit; keep `SPEC.md` updated when flags change; lazy-import GPU libs; sequential stage execution.
@@ -69,7 +69,7 @@ class ITTSProvider(abc.ABC):
 4. Flag flips (`avatar_renderer: sadtalker`, `vlm_quality_gate: true/false`, `broll: none/sd15_local`) need zero code changes.
 5. `git status` clean of models/outputs/secrets; push-ready.
 
-## Open Questions
-1. Niche + language (decides Kokoro voice vs XTTS clone)?
-2. Host face: real photo / AI face / anime (decides default renderer)?
-3. B-roll v1: `none` (fastest, recommended) vs `pexels` (needs key, not offline) vs `sd15_local`?
+## Open Questions (resolved 2026-10-12)
+1. ~~Niche + language~~ -> both generic user inputs (`--niche`, `--language`, config `tts.language`).
+2. ~~Host face~~ -> generic user input (`--host-image` / `host_image`) + `IAvatarMaker` module (`avatar_maker: none|mock|sd15_local`).
+3. ~~B-roll v1~~ -> `none` default. B-roll = cutaway visuals over the host voice (see README). Local gen (`sd15_local|wan_5b|ltx`) lands in T6.
