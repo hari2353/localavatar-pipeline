@@ -1,5 +1,7 @@
-import sys
-from pathlib import Path
+"""Shared harness fixtures: every test runs in an isolated cwd so the repo tree stays clean."""
+import pytest
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT))
+
+@pytest.fixture(autouse=True)
+def _isolate_cwd(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
