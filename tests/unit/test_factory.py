@@ -20,10 +20,11 @@ def test_musetalk_renderer_wired():
     assert isinstance(factory.make_avatar_renderer("musetalk"), e.MuseTalkRenderer)
 
 
-def test_musetalk_without_env_fails_loudly(tmp_path):
+def test_musetalk_without_env_fails_loudly(tmp_path, monkeypatch):
     import pytest
     from src.providers import expressive as e
     from src.interfaces import AudioTrack
+    monkeypatch.setattr(e, "MT_ENV_PY", tmp_path / "no-env-here" / "python.exe")
     with pytest.raises(RuntimeError, match="MuseTalk not ready"):
         e.MuseTalkRenderer().render(tmp_path / "face.png",
                                     AudioTrack(tmp_path / "v.wav", 3.0),
