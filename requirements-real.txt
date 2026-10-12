@@ -1,0 +1,4 @@
+# Real-engine deps (install ONLY on the render laptop, inside venv).
+# Kept separate so git clone + CI stay light. Versions pinned during T2-T6.
+# ollama (server) + qwen2.5:7b-instruct-q4_K_M
+# kokoro-82m, piper-tts, faster-whisper, musetalk (fp16), gfpgan, ffmpeg 6

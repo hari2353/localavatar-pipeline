@@ -1,0 +1,12 @@
+# local-only (models, outputs, secrets) — never push
+config.yaml
+models/
+outputs/
+voices/
+*.wav
+*.mp4
+*.srt
+__pycache__/
+.pytest_cache/
+.venv/
+venv/

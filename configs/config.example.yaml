@@ -1,0 +1,27 @@
+# Copy to config.yaml (gitignored) and edit. Flags = user choice, no code edits.
+niche: "tech facts"
+minutes: 3
+seed: 42
+host_image: "assets/host.png"
+host_voice_ref: "voices/host.wav"   # XTTS clone ref; Kokoro uses voice_id instead
+out_dir: "outputs"
+
+engines:
+  script_provider: "mock"    # mock | ollama_qwen | ollama_llama
+  tts_provider: "mock"       # mock | kokoro | xtts | piper
+  avatar_renderer: "mock"    # mock | musetalk | sadtalker | latentsync
+  broll_provider: "none"     # none | mock | sd15_local | wan_5b | ltx
+  enhancer: "none"           # none | gfpgan
+
+vlm_quality_gate:
+  enabled: false             # true = VLM accept/retry after render (default OFF)
+  model: "minicpm-v-2b"      # minicpm-v-2b | qwen2.5-vl-3b-q4
+
+tts:
+  voice_id: "af_heart"       # Kokoro fixed host voice
+  language: "en"
+
+video:
+  width: 1280
+  height: 720
+  fps: 30
