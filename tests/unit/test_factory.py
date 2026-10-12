@@ -36,7 +36,6 @@ def test_avatar_maker_none_is_strict():
 
 
 @pytest.mark.parametrize("fn,flag", [
-    (factory.make_script_provider, "ollama_qwen"),
     (factory.make_tts_provider, "kokoro"),
     (factory.make_tts_provider, "xtts"),
     (factory.make_avatar_renderer, "sadtalker"),

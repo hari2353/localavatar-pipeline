@@ -5,8 +5,9 @@
   - Verify: `python -m pytest tests/ -q` + `python scripts/smoke_e2e.py --providers mock --seconds 15`
 - [x] T0b unit + integration suites split (29 tests: tests/unit + tests/integration)
 - [x] T1 language/host-face generic inputs + IAvatarMaker module + B-roll docs
-- [ ] T2 real script provider (Ollama) behind flag
-- [ ] T3 real TTS provider (Kokoro default) behind flag
+- [x] T2 real script provider (Ollama qwen2.5:7b via local API, VRAM unload after gen)
+- [x] T3-partial real TTS: piper neural voice (offline, Windows-friendly); kokoro/xtts clone still open
+- [ ] T3-full realistic host voice: kokoro-82M or XTTS clone from user voice sample
 - [x] T4 real avatar provider (MuseTalk v1.5 fp16, 8GB-safe) behind flag
 - [x] T4a expressive avatar: musetalk lip-sync VERIFIED (mouth-band motion avg 7.5 over 3-min video, 24fps inference)
 - [ ] T4b sadtalker256 Unlocked (lip+motion+emotion, score 2, ~11 min/3-min video)

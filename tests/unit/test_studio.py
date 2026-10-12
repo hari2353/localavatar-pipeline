@@ -1,4 +1,6 @@
 """Unit: studio tier providers (real local media, kept FAST for the harness)."""
+from pathlib import Path
+
 from src import factory
 from src.interfaces import ICompositor
 from src.providers import studio as s
@@ -17,6 +19,21 @@ def test_sapi_speaks_short_line(tmp_path):
     sc = Script(title="t", sections=["body"], full_text="Hello. This is a voice test.")
     a = s.SapiTTSProvider().synthesize(sc, tmp_path / "v.wav")
     assert a.wav_path.exists() and a.duration_s > 1.0
+
+
+def test_piper_speaks_short_line(tmp_path):
+    import pytest
+    repo_root = Path(__file__).resolve().parents[2]
+    if not (repo_root / "voices" / "piper" / "en_US-lessac-medium.onnx").exists():
+        pytest.skip("piper voice model absent (local-only)")
+    from src.interfaces import Script
+    sc = Script(title="t", sections=["body"], full_text="Hello. This is the piper voice test.")
+    a = s.PiperTTSProvider().synthesize(sc, tmp_path / "p.wav")
+    assert a.wav_path.exists() and a.duration_s > 1.0
+
+
+def test_piper_wired_in_factory():
+    assert isinstance(factory.make_tts_provider("piper"), s.PiperTTSProvider)
 
 
 def test_pillow_face_png(tmp_path):
@@ -52,3 +69,13 @@ def test_compositor_auto_select():
     assert isinstance(factory.make_compositor(eng_mock), m.MockCompositor)
     assert isinstance(factory.make_compositor(eng_studio), s.CopyCompositor)
     assert isinstance(s.CopyCompositor(), ICompositor)
+
+
+def test_ollama_prompt_shape():
+    p = s.build_script_prompt("tech facts", 115, 7)
+    assert "tech facts" in p and "115" in p and "markdown" in p
+
+
+def test_ollama_wired_in_factory():
+    assert isinstance(factory.make_script_provider("ollama_qwen"),
+                      s.OllamaScriptProvider)

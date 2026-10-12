@@ -19,6 +19,56 @@ STUDIO_ENGINES = {"template", "sapi", "pillow_face", "sd15_face", "ffmpeg_slides
 WORDS_PER_MIN = 115  # calibrated to SAPI David @Rate 0 (~117 wpm measured)
 
 
+OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_MODELS = {"ollama_qwen": "qwen2.5:7b", "ollama_llama": "llama3.1:8b"}
+
+
+def build_script_prompt(niche: str, word_budget: int, seed: int) -> str:
+    return (
+        f"You write a YouTube narration script about {niche} ({word_budget} words, seed {seed}). "
+        "Rules: plain spoken sentences only, no markdown, no headings, no stage directions. "
+        "Structure: 1 hook sentence, then facts each starting with 'Fact:', end with a subscribe call to action."
+    )
+
+
+class OllamaScriptProvider(IScriptProvider):
+    """Local LLM script via Ollama HTTP API. Unloads the model afterwards to free VRAM."""
+
+    def __init__(self, flag: str = "ollama_qwen"):
+        self.flag = flag
+        self.model = OLLAMA_MODELS[flag]
+        self.name = flag
+
+    def generate(self, niche: str, minutes: int, seed: int, word_budget: int = 0) -> Script:
+        import json
+        import urllib.request
+        budget = word_budget or max(30, minutes * WORDS_PER_MIN)
+        prompt = build_script_prompt(niche, budget, seed)
+        body = json.dumps({"model": self.model, "prompt": prompt, "stream": False,
+                           "options": {"num_predict": budget * 2, "temperature": 0.7}}).encode()
+        req = urllib.request.Request(
+            __import__("os").environ.get("LAP_OLLAMA_URL", OLLAMA_URL), data=body,
+            headers={"Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=600) as r:
+                text = json.load(r)["response"]
+        except Exception as e:  # noqa: BLE001
+            raise RuntimeError(f"ollama request failed (is `ollama serve` running?): {e}")
+        finally:
+            self._unload()
+        words = " ".join(text.split())
+        if len(words.split()) > budget + 60:
+            words = " ".join(words.split()[:budget])
+        return Script(title=f"{niche} daily brief", sections=["hook", "body", "cta"], full_text=words)
+
+    def _unload(self):
+        import subprocess
+        try:
+            subprocess.run(["ollama", "stop", self.model], capture_output=True, timeout=120)
+        except Exception:  # noqa: BLE001
+            pass
+
+
 class TemplateScriptProvider(IScriptProvider):
     name = "template"
 
@@ -66,6 +116,30 @@ class SapiTTSProvider(ITTSProvider):
                                capture_output=True, text=True, timeout=600)
         if r.returncode != 0 or not out_wav.exists():
             raise RuntimeError(f"SAPI synthesis failed: {r.stderr[-500:]}")
+        return AudioTrack(wav_path=out_wav, duration_s=_wav_duration(out_wav))
+
+
+class PiperTTSProvider(ITTSProvider):
+    """Neural voice, offline, no model download beyond voices/piper/*.onnx (gitignored)."""
+    name = "piper"
+    DEFAULT_VOICE = "en_US-lessac-medium"
+
+    def synthesize(self, script: Script, out_wav: Path, voice_id: str = "") -> AudioTrack:
+        import sys
+        ROOT = Path(__file__).resolve().parents[2]
+        vdir = ROOT / "voices" / "piper"
+        stem = voice_id if voice_id and (vdir / f"{voice_id}.onnx").exists() else self.DEFAULT_VOICE
+        model = vdir / f"{stem}.onnx"
+        if not model.exists():
+            raise RuntimeError(f"piper voice missing: {model} (put .onnx+.json in voices/piper/)")
+        out_wav.parent.mkdir(parents=True, exist_ok=True)
+        venv_piper = ROOT / ".venv" / "Scripts" / "piper.exe"
+        exe = str(venv_piper) if venv_piper.exists() else "piper"
+        r = subprocess.run([exe, "--model", str(model), "--output_file", str(out_wav)],
+                           input=script.full_text.encode("utf-8"),
+                           capture_output=True, timeout=900)
+        if r.returncode != 0 or not out_wav.exists():
+            raise RuntimeError(f"piper synth failed: {r.stderr[-400:]!r}")
         return AudioTrack(wav_path=out_wav, duration_s=_wav_duration(out_wav))
 
 

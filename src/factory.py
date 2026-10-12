@@ -6,8 +6,10 @@ def make_script_provider(flag: str):
     from .providers import mock as m, studio as s
     if flag == "template":
         return s.TemplateScriptProvider()
+    if flag in ("ollama_qwen", "ollama_llama"):
+        return s.OllamaScriptProvider(flag)
     if flag != "mock":
-        raise NotImplementedError(f"script engine {flag!r} lands in T2 (SPEC offset)")
+        raise NotImplementedError(f"script engine {flag!r} unknown")
     return m.MockScript()
 
 
@@ -15,6 +17,8 @@ def make_tts_provider(flag: str):
     from .providers import mock as m, studio as s
     if flag == "sapi":
         return s.SapiTTSProvider()
+    if flag == "piper":
+        return s.PiperTTSProvider()
     if flag != "mock":
         raise NotImplementedError(f"tts engine {flag!r} lands in T3")
     return m.MockTTS()
