@@ -20,11 +20,11 @@ def test_mock_pipeline_e2e(tmp_path):
     assert meta["accepted"] is True
 
 
-def test_vlm_gate_off_passes_and_broll_none_ok():
+def test_vlm_gate_off_passes_and_broll_none_ok(tmp_path):
     gate = factory.make_quality_gate(False, "minicpm-v-2b")
     from src.providers.mock import MockAvatar
     from src.interfaces import AudioTrack
-    clip = MockAvatar().render(Path("x.png"), AudioTrack(Path("a.wav"), 3.0), Path("o.mp4"))
+    clip = MockAvatar().render(Path("x.png"), AudioTrack(Path("a.wav"), 3.0), tmp_path / "o.mp4")
     assert gate.review(clip) is True
 
 
