@@ -7,10 +7,10 @@ host_voice_ref: "voices/host.wav"   # XTTS clone ref; Kokoro uses voice_id inste
 out_dir: "outputs"
 
 engines:
-  script_provider: "mock"    # mock | ollama_qwen | ollama_llama
-  tts_provider: "mock"       # mock | kokoro | xtts | piper
-  avatar_maker: "mock"       # none (strict: you supply host_image) | mock (placeholder if missing) | sd15_local (local face gen, T6)
-  avatar_renderer: "mock"    # mock | musetalk | sadtalker | latentsync
+  script_provider: "mock"    # mock | template (real, no LLM) | ollama_qwen | ollama_llama
+  tts_provider: "mock"       # mock | sapi (real offline Windows voice) | kokoro | xtts | piper
+  avatar_maker: "mock"       # none (strict) | mock | pillow_face (real PNG) | sd15_local (T6)
+  avatar_renderer: "mock"    # mock | ffmpeg_slideshow (real MP4) | musetalk | sadtalker | latentsync
   broll_provider: "none"     # none | mock | sd15_local | wan_5b | ltx
   enhancer: "none"           # none | gfpgan
 

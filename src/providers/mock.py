@@ -4,7 +4,6 @@ from pathlib import Path
 from ..interfaces import (AudioTrack, IAvatarMaker, IBrollProvider, IAvatarRenderer, ICompositor,
                           IQualityGate, IScriptProvider, ITTSProvider, Script, VideoClip)
 
-
 class MockScript(IScriptProvider):
     name = "mock"
     def generate(self, niche: str, minutes: int, seed: int) -> Script:
@@ -48,6 +47,14 @@ class PassThroughGate(IQualityGate):
     name = "off"
     def review(self, clip: VideoClip) -> bool:
         return True
+
+
+class MockCompositor(ICompositor):
+    name = "mock"
+    def compose(self, avatar: VideoClip, audio: AudioTrack, broll: list, out_mp4: Path) -> VideoClip:
+        out_mp4.parent.mkdir(parents=True, exist_ok=True)
+        out_mp4.write_bytes(b"mock-mp4")
+        return VideoClip(mp4_path=out_mp4, duration_s=avatar.duration_s)
 
 
 class MockAvatarMaker(IAvatarMaker):

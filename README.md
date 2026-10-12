@@ -12,8 +12,9 @@ python scripts/smoke_e2e.py --providers mock --niche "tech facts" --seconds 15
 ## Daily real run (RTX 3070 laptop)
 ```powershell
 copy configs\config.example.yaml config.yaml
-# edit config.yaml flags (see below), place host.png + speaker.wav
-python scripts/run_daily.py --config config.yaml --niche "tech facts" --minutes 3 --language ur --host-image assets/host.png
+# edit config.yaml flags (see below). Studio tier = real playable video, zero downloads:
+# script_provider: template | tts_provider: sapi | avatar_maker: pillow_face | avatar_renderer: ffmpeg_slideshow
+python scripts/run_daily.py --config config.yaml --niche "tech facts" --minutes 3 --language en
 ```
 
 ## B-roll (what it is)
@@ -27,10 +28,10 @@ All in `config.yaml` (gitignored). Example in `configs/config.example.yaml`:
 
 | Flag | Choices | Default | Notes |
 |---|---|---|---|
-| `script_provider` | `mock \| ollama_qwen | ollama_llama` | `mock` | LLM writes script |
-| `tts_provider` | `mock \| kokoro \| xtts \| piper` | `mock` | `kokoro`=Apache-2.0 default real; `xtts`=best clone but CPML license |
-| `avatar_renderer` | `mock \| musetalk \| sadtalker \| latentsync` | `mock` | `musetalk`=recommended 8GB |
-| `avatar_maker` | `none \| mock \| sd15_local` | `mock` | `none`=strict, you supply `--host-image`; `sd15_local`=local face gen (T6) |
+| `script_provider` | `mock \| template \| ollama_qwen \| ollama_llama` | `mock` | `template`=real script, no download |
+| `tts_provider` | `mock \| sapi \| kokoro \| xtts \| piper` | `mock` | `sapi`=real offline Windows voice (en) |
+| `avatar_renderer` | `mock \| ffmpeg_slideshow \| musetalk \| sadtalker \| latentsync` | `mock` | `ffmpeg_slideshow`=real MP4, no GPU |
+| `avatar_maker` | `none \| mock \| pillow_face \| sd15_local` | `mock` | `pillow_face`=real PNG host card |
 | `broll_provider` | `none \| mock \| sd15_local \| wan_5b \| ltx` | `none` | video-LLM is B-roll only, default OFF |
 | `vlm_quality_gate` | `false \| true` + `vlm_model: minicpm-v-2b \| qwen2.5-vl-3b-q4` | `false` | post-render accept/retry |
 | `enhancer` | `none \| gfpgan` | `none` | optional |

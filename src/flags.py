@@ -5,10 +5,10 @@ from pathlib import Path
 import yaml
 
 VALID = {
-    "script_provider": {"mock", "ollama_qwen", "ollama_llama"},
-    "tts_provider": {"mock", "kokoro", "xtts", "piper"},
-    "avatar_renderer": {"mock", "musetalk", "sadtalker", "latentsync"},
-    "avatar_maker": {"none", "mock", "sd15_local"},
+    "script_provider": {"mock", "template", "ollama_qwen", "ollama_llama"},
+    "tts_provider": {"mock", "sapi", "kokoro", "xtts", "piper"},
+    "avatar_renderer": {"mock", "ffmpeg_slideshow", "musetalk", "sadtalker", "latentsync"},
+    "avatar_maker": {"none", "mock", "pillow_face", "sd15_local"},
     "broll_provider": {"none", "mock", "sd15_local", "wan_5b", "ltx"},
     "enhancer": {"none", "gfpgan"},
     "vlm_model": {"minicpm-v-2b", "qwen2.5-vl-3b-q4"},

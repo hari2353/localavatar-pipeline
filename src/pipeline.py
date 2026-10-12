@@ -21,13 +21,13 @@ def run(cfg: dict, niche: str) -> dict:
     broll = factory.make_broll_provider(eng["broll_provider"]).generate(script, out)
     gate = factory.make_quality_gate(cfg["vlm_quality_gate"]["enabled"], cfg["vlm_quality_gate"]["model"])
     accepted = gate.review(clip)
-    final = out / "final.mp4"
-    final.write_bytes(b"mock-mp4")
-    (out / "subs.srt").write_text("1\n00:00:00,000 --> 00:00:02,000\n" + script.title + "\n")
+    final = factory.make_compositor(eng).compose(clip, audio, broll, out / "final.mp4")
+    from .providers.studio import write_srt
+    write_srt(script, audio.duration_s, out / "subs.srt")
     meta = {"niche": niche, "minutes": minutes, "language": language,
             "host_image": str(host_path), "engines": eng,
             "vlm_gate": cfg["vlm_quality_gate"], "accepted": accepted,
-            "artifacts": [str(final), str(out / "subs.srt")]}
+            "artifacts": [str(final.mp4_path), str(out / "subs.srt")]}
     import json
     (out / "meta.json").write_text(json.dumps(meta, indent=2))
     return meta
