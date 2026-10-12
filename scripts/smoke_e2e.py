@@ -23,7 +23,9 @@ def main():
     with open(ROOT / "configs" / "config.example.yaml", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
     if args.providers == "mock":
-        cfg["engines"] = {k: ("none" if k == "broll_provider" else "mock") for k in cfg["engines"]}
+        for k in ("script_provider", "tts_provider", "avatar_renderer", "avatar_maker"):
+            cfg["engines"][k] = "mock"
+        cfg["engines"]["broll_provider"] = "none"
         cfg["vlm_quality_gate"]["enabled"] = False
     tmp = Path(tempfile.mkdtemp())
     cfg["out_dir"] = args.out
