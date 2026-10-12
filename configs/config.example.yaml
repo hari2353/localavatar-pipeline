@@ -18,6 +18,12 @@ vlm_quality_gate:
   enabled: false             # true = VLM accept/retry after render (default OFF)
   model: "minicpm-v-2b"      # minicpm-v-2b | qwen2.5-vl-3b-q4
 
+avatar:                      # musetalk blend tuning (measured, not guessed)
+  extra_margin: 10           # jaw-region margin px (try 10/20)
+  parsing_mode: "jaw"        # jaw | full
+  batch_size: 4              # 8GB-safe
+  bbox_shift: 0              # vertical nudge px
+
 tts:
   voice_id: "af_heart"       # Kokoro fixed host voice
   language: "en"             # generic user input: override via --language (e.g. en, ur, hi)

@@ -19,6 +19,13 @@ class MuseTalkRenderer(IAvatarRenderer):
     """v1.5 lip-sync (expression score 1). 8GB-safe: fp16 + batch 4."""
     name = "musetalk"
 
+    def __init__(self, extra_margin: int = 10, parsing_mode: str = "jaw",
+                 batch_size: int = 4, bbox_shift: int = 0):
+        self.extra_margin = extra_margin
+        self.parsing_mode = parsing_mode
+        self.batch_size = batch_size
+        self.bbox_shift = bbox_shift
+
     def _check(self):
         missing = [p for p in (MT_ENV_PY, MT_UNET, MT_UNET_CFG) if not p.exists()]
         if missing:
@@ -51,8 +58,11 @@ class MuseTalkRenderer(IAvatarRenderer):
         cmd = [str(MT_ENV_PY), "-m", "scripts.inference",
                "--inference_config", str(cfg), "--result_dir", str(res),
                "--unet_model_path", str(MT_UNET), "--unet_config", str(MT_UNET_CFG),
-               "--version", "v15", "--use_float16", "--batch_size", "4",
-               "--fps", "25", "--output_vid_name", "lip.mp4"]
+               "--version", "v15", "--use_float16", "--batch_size", str(self.batch_size),
+               "--fps", "25", "--output_vid_name", "lip.mp4",
+               "--extra_margin", str(self.extra_margin),
+               "--parsing_mode", self.parsing_mode,
+               "--bbox_shift", str(self.bbox_shift)]
         env = dict(os.environ)
         env["PYTHONPATH"] = str(VENDOR) + os.pathsep + env.get("PYTHONPATH", "")
         env["PYTHONUTF8"] = "1"

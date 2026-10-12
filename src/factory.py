@@ -24,13 +24,17 @@ def make_tts_provider(flag: str):
     return m.MockTTS()
 
 
-def make_avatar_renderer(flag: str):
+def make_avatar_renderer(flag: str, opts: dict | None = None):
     from .providers import mock as m, studio as s
     if flag == "ffmpeg_slideshow":
         return s.FfmpegSlideshowRenderer()
     if flag == "musetalk":
         from .providers import expressive as e
-        return e.MuseTalkRenderer()
+        o = opts or {}
+        return e.MuseTalkRenderer(extra_margin=int(o.get("extra_margin", 10)),
+                                  parsing_mode=str(o.get("parsing_mode", "jaw")),
+                                  batch_size=int(o.get("batch_size", 4)),
+                                  bbox_shift=int(o.get("bbox_shift", 0)))
     if flag in ("sadtalker", "latentsync"):
         raise NotImplementedError(f"avatar engine {flag!r} lands in T4b (SPEC offset)")
     if flag != "mock":

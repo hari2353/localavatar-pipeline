@@ -17,7 +17,7 @@ def run(cfg: dict, niche: str) -> dict:
         script, out / "voice.wav", cfg.get("tts", {}).get("voice_id", ""))
     host_path = factory.make_avatar_maker(eng["avatar_maker"]).ensure(
         Path(cfg.get("host_image", "assets/host.png")), seed)
-    clip = factory.make_avatar_renderer(eng["avatar_renderer"]).render(host_path, audio, out / "avatar.mp4")
+    clip = factory.make_avatar_renderer(eng["avatar_renderer"], cfg.get("avatar", {})).render(host_path, audio, out / "avatar.mp4")
     broll = factory.make_broll_provider(eng["broll_provider"]).generate(script, out)
     gate = factory.make_quality_gate(cfg["vlm_quality_gate"]["enabled"], cfg["vlm_quality_gate"]["model"])
     accepted = gate.review(clip)

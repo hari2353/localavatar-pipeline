@@ -17,7 +17,11 @@ def test_mock_flags_map_to_mocks():
 
 def test_musetalk_renderer_wired():
     from src.providers import expressive as e
-    assert isinstance(factory.make_avatar_renderer("musetalk"), e.MuseTalkRenderer)
+    r = factory.make_avatar_renderer("musetalk")
+    assert isinstance(r, e.MuseTalkRenderer)
+    assert (r.extra_margin, r.parsing_mode, r.batch_size) == (10, "jaw", 4)
+    r2 = factory.make_avatar_renderer("musetalk", {"extra_margin": 20, "parsing_mode": "jaw"})
+    assert r2.extra_margin == 20
 
 
 def test_musetalk_without_env_fails_loudly(tmp_path, monkeypatch):
