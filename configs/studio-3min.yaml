@@ -1,0 +1,23 @@
+engines:
+  avatar_maker: pillow_face
+  avatar_renderer: ffmpeg_slideshow
+  broll_provider: none
+  enhancer: none
+  script_provider: template
+  tts_provider: sapi
+host_image: outputs/daily/host.png
+host_voice_ref: voices/host.wav
+minutes: 3
+niche: tech facts
+out_dir: outputs/daily
+seed: 42
+tts:
+  language: en
+  voice_id: af_heart
+video:
+  fps: 30
+  height: 720
+  width: 1280
+vlm_quality_gate:
+  enabled: false
+  model: minicpm-v-2b
