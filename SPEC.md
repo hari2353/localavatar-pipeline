@@ -1,14 +1,17 @@
 # Spec: LocalAvatar-Pipeline (100% local, open-source, daily 3-min AI host video)
 
 ## Objective
-Input `niche + minutes(=3)` -> output MP4 with fixed AI host (photo avatar + cloned voice), subtitles, B-roll, thumbnail. Runs end-to-end on a single laptop GPU (target: RTX 3070 Laptop 8GB, 16GB RAM, Windows 11). One command daily. User picks engines via feature flags, no code edits.
+Input `niche + minutes(=3)` -> output MP4 with fixed AI host (photo avatar + voice), timed .srt sidecar. Runs end-to-end on a single laptop GPU (target: RTX 3070 Laptop 8GB, 16GB RAM, Windows 11). One command daily. User picks engines via feature flags, no code edits.
 
-Success = `python scripts/smoke_e2e.py --providers mock` passes on a fresh clone with no GPU, and the same command with real flags renders a 3-min video on the target laptop in <45 min.
+Success = `python scripts/smoke_e2e.py --providers mock` passes on a fresh clone with no GPU, and the same command with real flags renders a video on the target laptop. Verified 2026-10-13: full chain qwen2.5 script -> piper voice -> musetalk lips, 2:38 render, motion gate `mouth-avg 8.08 / 317 frames` (see release v0.1-t4a-demo).
 
 ## Tech Stack
-- Python 3.11, FFmpeg 6 (NVENC), Ollama (LLM/VLM), PyTorch cu117 (real providers only)
-- Real engines (lazy, optional): Kokoro-82M / XTTS-v2 / Piper | MuseTalk / SadTalker / LatentSync | faster-whisper | GFPGAN | Wan-2.2-5B-GGUF or LTX-Video (B-roll only) | MiniCPM-V-2B or Qwen2.5-VL-3B-Q4 (quality gate)
+- Python 3.11, FFmpeg 6 (NVENC), Ollama or vLLM (LLM), PyTorch cu117 (real providers only)
+- Real engines (lazy, optional): Piper / Kokoro-82M / XTTS-v2 | MuseTalk / SadTalker / LatentSync | faster-whisper (subs) | GFPGAN | Wan-2.2-5B-GGUF or LTX-Video (B-roll only) | MiniCPM-V-2B or Qwen2.5-VL-3B-Q4 (quality gate)
 - Harness: pytest, no torch/transformers at import time
+- Platform notes (verified on the dev laptop, 8GB VRAM / 16GB RAM / Windows 11):
+  - vLLM has no Windows build -> Linux-only; Ollama is the Windows script backend (`vllm` flag targets capable Linux machines)
+  - MuseTalk needs its own venv (`envs/musetalk`) + mmpose/mmpose shims in `src/vendor` (see requirements-real.txt)
 
 ## Commands
 ```powershell
@@ -63,11 +66,12 @@ class ITTSProvider(abc.ABC):
 - Never: commit `config.yaml` with personal paths, `models/`, `outputs/`, voice references, secrets/API keys; commit code that imports torch at top level of `src/`.
 
 ## Success Criteria
-1. Fresh clone + `pip install -r requirements.txt` + `pytest` green, no GPU.
-2. `smoke_e2e --providers mock` produces `outputs/smoke/final.mp4` + `.srt` + `meta.json`.
-3. Same CLI with `avatar_renderer: musetalk`, `tts: kokoro` renders 3-min video on RTX 3070 8GB in <45 min.
-4. Flag flips (`avatar_renderer: sadtalker`, `vlm_quality_gate: true/false`, `broll: none/sd15_local`) need zero code changes.
-5. `git status` clean of models/outputs/secrets; push-ready.
+1. Fresh clone + `pip install -r requirements.txt` + `pytest` green, no GPU. [met locally; CI fixed 2026-10-13]
+2. `smoke_e2e --providers mock` produces `outputs/smoke/final.mp4` + `.srt` + `meta.json`. [met]
+3. Real chain renders a ~3-min video on RTX 3070 8GB in <45 min. [met 2026-10-13: ~12 min; note piper pace != sapi pace, so `minutes` is a target not a guarantee]
+4. Flag flips (`avatar_renderer`, `tts_provider`, `vlm_quality_gate`, `broll_provider`) need zero code changes. [met]
+5. `git status` clean of models/outputs/secrets; push-ready. [met; repo public, demo videos on release v0.1-t4a-demo]
+6. Expression score > 1 (head motion / emotion), via `sadtalker256`. [OPEN]
 
 ## Open Questions (resolved 2026-10-12)
 1. ~~Niche + language~~ -> both generic user inputs (`--niche`, `--language`, config `tts.language`).

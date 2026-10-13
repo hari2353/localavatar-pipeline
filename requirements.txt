@@ -1,3 +1,5 @@
-# Harness-only deps (CPU, no GPU wheels) — fresh clone + CI use this
+# Harness deps (CPU, no GPU wheels) — fresh clone + CI use this.
+# Studio-tier tests need pillow + ffmpeg (both CPU-only, tiny).
 pyyaml>=6.0
 pytest>=8.0
+pillow>=10.0

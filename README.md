@@ -1,8 +1,14 @@
-# LocalAvatar-Pipeline — niche in, 3-min host video out. 100% local.
+# LocalAvatar-Pipeline — niche in, host video out. 100% local, 100% open source.
+
+## Status (2026-10-13)
+Verified working locally: LLM script (Ollama / vLLM) → voice (piper / SAPI) → human face (SD 1.5) → lip-sync (MuseTalk v1.5) → mp4 + timed `.srt`.
+Demo videos: [release v0.1-t4a-demo](https://github.com/hari2353/localavatar-pipeline/releases/tag/v0.1-t4a-demo).
+Still open: head motion/emotion (SadTalker), voice cloning, burned-in subtitles, B-roll, VLM quality gate.
+Quality gate: `python scripts/measure_motion.py --video outputs/<run>/final.mp4` → `MOTION OK/FAIL`.
 
 ## Quickstart (works on any machine, no GPU)
 ```powershell
-cd F:\localavatar-pipeline
+cd D:\localavatar-pipeline
 python -m pip install -r requirements.txt
 python -m pytest tests/unit -q          # fast unit slice
 python -m pytest tests/integration -q   # end-to-end loop on mocks
@@ -53,12 +59,6 @@ stays resident server-side (VRAM held), unlike `ollama_qwen` which unloads after
 ## SOLID map
 `src/interfaces.py` = ABCs; `src/factory.py` = DI from flags; `src/pipeline.py` = orchestrator. New engine = new file implementing the ABC + 1 factory line. No pipeline edits.
 
-## Push to GitHub
-```powershell
-cd F:\localavatar-pipeline
-git init -b main 2>$null; git add -A; git commit -m "chore: git-ready scaffold with flags + mock harness"
-gh repo create localavatar-pipeline --private --source=. --push
-# no gh? -> create empty repo on github.com, then:
-# git remote add origin https://github.com/<you>/localavatar-pipeline.git; git push -u origin main
-```
-Never committed: `config.yaml`, `models/`, `outputs/`, `voices/`, `*.wav/*.mp4` (see `.gitignore`).
+## Repo
+Hosted at https://github.com/hari2353/localavatar-pipeline (public). Demo videos live in release `v0.1-t4a-demo`.
+Never committed: `config.yaml`, `models/`, `outputs/`, `voices/`, `envs/`, `.venv/`, `*.wav/*.mp4` (see `.gitignore`).

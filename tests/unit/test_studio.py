@@ -1,5 +1,8 @@
 """Unit: studio tier providers (real local media, kept FAST for the harness)."""
+import shutil
 from pathlib import Path
+
+import pytest
 
 from src import factory
 from src.interfaces import ICompositor
@@ -15,6 +18,8 @@ def test_template_script_word_budget():
 
 
 def test_sapi_speaks_short_line(tmp_path):
+    if not shutil.which("powershell"):
+        pytest.skip("Windows SAPI unavailable on this platform")
     from src.interfaces import Script
     sc = Script(title="t", sections=["body"], full_text="Hello. This is a voice test.")
     a = s.SapiTTSProvider().synthesize(sc, tmp_path / "v.wav")
@@ -22,7 +27,6 @@ def test_sapi_speaks_short_line(tmp_path):
 
 
 def test_piper_speaks_short_line(tmp_path):
-    import pytest
     repo_root = Path(__file__).resolve().parents[2]
     if not (repo_root / "voices" / "piper" / "en_US-lessac-medium.onnx").exists():
         pytest.skip("piper voice model absent (local-only)")
@@ -43,6 +47,8 @@ def test_pillow_face_png(tmp_path):
 
 
 def test_slideshow_renders_real_mp4(tmp_path):
+    if not shutil.which("ffmpeg"):
+        pytest.skip("ffmpeg not on PATH")
     from src.interfaces import AudioTrack, Script
     sc = Script(title="t", sections=["body"], full_text="Hello world.")
     face = s.PillowFaceMaker().ensure(tmp_path / "host.png")

@@ -10,3 +10,12 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python -m pytest tests/ -q
       - run: python scripts/smoke_e2e.py --providers mock --seconds 15
+
+  cpu-harness-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - run: pip install -r requirements.txt
+      - run: python -m pytest tests/ -q   # proves the harness is platform-neutral
