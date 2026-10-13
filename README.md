@@ -28,7 +28,7 @@ All in `config.yaml` (gitignored). Example in `configs/config.example.yaml`:
 
 | Flag | Choices | Default | Notes |
 |---|---|---|---|
-| `script_provider` | `mock \| template \| ollama_qwen \| ollama_llama` | `mock` | `template`=real script, no download |
+| `script_provider` | `mock \| template \| ollama_qwen \| ollama_llama \| vllm` | `mock` | `template`=no download; `ollama_*`=local LLM; `vllm`=capable Linux machines (see below) |
 | `tts_provider` | `mock \| sapi \| kokoro \| xtts \| piper` | `mock` | `sapi`=real offline Windows voice (en) |
 | `avatar_renderer` | `mock \| ffmpeg_slideshow \| musetalk \| sadtalker \| latentsync` | `mock` | `ffmpeg_slideshow`=real MP4, no GPU |
 | `avatar_maker` | `none \| mock \| pillow_face \| sd15_local` | `mock` | `pillow_face`=real PNG host card |
@@ -37,6 +37,18 @@ All in `config.yaml` (gitignored). Example in `configs/config.example.yaml`:
 | `enhancer` | `none \| gfpgan` | `none` | optional |
 
 Env override: `LAP_TTS=kokoro LAP_AVATAR=musetalk LAP_VLM_GATE=true`.
+
+## For capable machines (vLLM path)
+Got Linux + 12GB+ VRAM? Swap the script backend to vLLM for high-throughput generation:
+```bash
+pip install vllm
+vllm serve Qwen/Qwen2.5-7B-Instruct-AWQ --gpu-memory-utilization 0.8 &
+export LAP_VLLM_URL=http://localhost:8000/v1/chat/completions  # or leave default
+export LAP_VLLM_MODEL=Qwen2.5-7B-Instruct-AWQ
+```
+then `script_provider: vllm` (or `LAP_SCRIPT=vllm`). Same `IScriptProvider` contract —
+rest of the pipeline (voice, lips, compose) is unchanged. Note the tradeoff: the model
+stays resident server-side (VRAM held), unlike `ollama_qwen` which unloads after each script.
 
 ## SOLID map
 `src/interfaces.py` = ABCs; `src/factory.py` = DI from flags; `src/pipeline.py` = orchestrator. New engine = new file implementing the ABC + 1 factory line. No pipeline edits.

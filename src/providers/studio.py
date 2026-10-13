@@ -20,6 +20,9 @@ WORDS_PER_MIN = 115  # calibrated to SAPI David @Rate 0 (~117 wpm measured)
 OLLAMA_URL = "http://localhost:11434/api/generate"
 OLLAMA_MODELS = {"ollama_qwen": "qwen2.5:7b", "ollama_llama": "llama3.1:8b"}
 
+# vLLM path (Linux + 12GB+ VRAM machines): vllm serve <model> exposes /v1/chat/completions.
+VLLM_URL = "http://localhost:8000/v1/chat/completions"
+
 
 def build_script_prompt(niche: str, word_budget: int, seed: int) -> str:
     return (
@@ -65,6 +68,44 @@ class OllamaScriptProvider(IScriptProvider):
             subprocess.run(["ollama", "stop", self.model], capture_output=True, timeout=120)
         except Exception:  # noqa: BLE001
             pass
+
+
+def build_chat_payload(model: str, niche: str, word_budget: int, seed: int) -> dict:
+    return {"model": model,
+            "messages": [{"role": "user", "content": build_script_prompt(niche, word_budget, seed)}],
+            "temperature": 0.7, "max_tokens": word_budget * 2}
+
+
+class VLLMScriptProvider(IScriptProvider):
+    """High-throughput script backend for capable machines (Linux, 12GB+ VRAM).
+
+    Talks OpenAI-compatible /v1/chat/completions — works with `vllm serve` and any
+    compatible server. Model stays loaded server-side (that is the vLLM tradeoff:
+    throughput for VRAM). Configure via LAP_VLLM_URL / LAP_VLLM_MODEL.
+    """
+    name = "vllm"
+
+    def __init__(self, model: str = ""):
+        import os
+        self.model = model or os.environ.get("LAP_VLLM_MODEL", "Qwen2.5-7B-Instruct-AWQ")
+
+    def generate(self, niche: str, minutes: int, seed: int, word_budget: int = 0) -> Script:
+        import json
+        import os
+        import urllib.request
+        budget = word_budget or max(30, minutes * WORDS_PER_MIN)
+        body = json.dumps(build_chat_payload(self.model, niche, budget, seed)).encode()
+        url = os.environ.get("LAP_VLLM_URL", VLLM_URL)
+        req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=600) as r:
+                text = json.load(r)["choices"][0]["message"]["content"]
+        except Exception as e:  # noqa: BLE001
+            raise RuntimeError(f"vLLM request failed at {url} (is `vllm serve` running?): {e}")
+        words = " ".join(text.split())
+        if len(words.split()) > budget + 60:
+            words = " ".join(words.split()[:budget])
+        return Script(title=f"{niche} daily brief", sections=["hook", "body", "cta"], full_text=words)
 
 
 class TemplateScriptProvider(IScriptProvider):

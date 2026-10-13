@@ -84,3 +84,10 @@ def test_ollama_prompt_shape():
 def test_ollama_wired_in_factory():
     assert isinstance(factory.make_script_provider("ollama_qwen"),
                       s.OllamaScriptProvider)
+
+
+def test_vllm_payload_shape_and_wiring():
+    p = s.build_chat_payload("Qwen2.5-7B-Instruct-AWQ", "tech facts", 115, 7)
+    assert p["model"] == "Qwen2.5-7B-Instruct-AWQ"
+    assert "tech facts" in p["messages"][0]["content"] and p["max_tokens"] == 230
+    assert isinstance(factory.make_script_provider("vllm"), s.VLLMScriptProvider)

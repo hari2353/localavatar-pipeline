@@ -8,6 +8,8 @@ def make_script_provider(flag: str):
         return s.TemplateScriptProvider()
     if flag in ("ollama_qwen", "ollama_llama"):
         return s.OllamaScriptProvider(flag)
+    if flag == "vllm":
+        return s.VLLMScriptProvider()
     if flag != "mock":
         raise NotImplementedError(f"script engine {flag!r} unknown")
     return m.MockScript()
