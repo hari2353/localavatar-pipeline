@@ -8,7 +8,10 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: "3.11"}
       - run: pip install -r requirements.txt
+      # GitHub runners have no ffmpeg on PATH; tests guard on it (pytest.skip).
       - run: python -m pytest tests/ -q
+      - name: install ffmpeg
+        run: choco install ffmpeg --no-progress -y
       - run: python scripts/smoke_e2e.py --providers mock --seconds 15
 
   cpu-harness-linux:

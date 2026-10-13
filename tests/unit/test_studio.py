@@ -18,8 +18,8 @@ def test_template_script_word_budget():
 
 
 def test_sapi_speaks_short_line(tmp_path):
-    if not shutil.which("powershell"):
-        pytest.skip("Windows SAPI unavailable on this platform")
+    if not shutil.which("powershell") or not shutil.which("ffprobe"):
+        pytest.skip("Windows SAPI/ffprobe unavailable on this platform")
     from src.interfaces import Script
     sc = Script(title="t", sections=["body"], full_text="Hello. This is a voice test.")
     a = s.SapiTTSProvider().synthesize(sc, tmp_path / "v.wav")
