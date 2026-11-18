@@ -6,6 +6,15 @@ Demo videos: [release v0.1-t4a-demo](https://github.com/hari2353/localavatar-pip
 Still open: head motion/emotion (SadTalker), voice cloning, burned-in subtitles, B-roll, VLM quality gate.
 Quality gate: `python scripts/measure_motion.py --video outputs/<run>/final.mp4` → `MOTION OK/FAIL`.
 
+## Still open → shipped (market-steal, 2026-11-18)
+
+| Feature | Flag | Notes |
+|---|---|---|
+| Burned-in subtitles | `subtitles_burn: true` | ffmpeg subtitles filter (mock-tier: deterministic copy); SRT timing kept |
+| Auto thumbnail | `thumbnail: true` | 1280×720 JPEG from the host frame + episode title, brand-aware |
+| Brand kit | `brand: {handle, accent, title_scale}` | handle + accent bar on the thumbnail; colors clamped |
+| Auto-retry quality gate | `vlm_quality_gate.max_attempts: N` | gate fail ⇒ re-produce with seed+1, up to N; exhaustion records `accepted: false` honestly |
+
 ## Quickstart (works on any machine, no GPU)
 ```powershell
 cd D:\localavatar-pipeline

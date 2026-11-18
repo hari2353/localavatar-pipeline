@@ -13,3 +13,6 @@ __pycache__/
 .pytest_cache/
 .venv/
 venv/
+
+# stray self-copy from the copy mishap; never track
+/localavatar-pipeline/
