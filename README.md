@@ -68,6 +68,23 @@ stays resident server-side (VRAM held), unlike `ollama_qwen` which unloads after
 ## SOLID map
 `src/interfaces.py` = ABCs; `src/factory.py` = DI from flags; `src/pipeline.py` = orchestrator. New engine = new file implementing the ABC + 1 factory line. No pipeline edits.
 
+## Scenario benchmark (Harvard Edge AVPerf cross-pollination)
+
+`src/benchmark.py` runs named end-to-end scenarios once and reports a **safe
+end-to-end processing rate** — completed without error *and* inside the
+deadline. A raised provider error is a failed scenario, not a crashed
+benchmark; failures are bounded.
+
+```python
+from src.benchmark import run_scenarios
+
+report = run_scenarios(
+    [("daily-3min", lambda: run(config, niche="tech facts", minutes=3))],
+    deadline_s=300,
+)
+# {'safe_rate': 1.0, 'scenarios': [...], 'failures': []}
+```
+
 ## Repo
 Hosted at https://github.com/hari2353/localavatar-pipeline (public). Demo videos live in release `v0.1-t4a-demo`.
 Never committed: `config.yaml`, `models/`, `outputs/`, `voices/`, `envs/`, `.venv/`, `*.wav/*.mp4` (see `.gitignore`).
