@@ -41,7 +41,11 @@ def test_mixed_run_reports_rate():
 
 
 def test_invalid_inputs_rejected():
-    for scenarios, deadline in (([], 1), ([("", lambda: None)], 1), ([("a", lambda: None)], 0)):
+    for scenarios, deadline in (
+        ([], 1),
+        ([("", lambda: None)], 1),
+        ([("a", lambda: None)], 0),
+    ):
         try:
             run_scenarios(scenarios, deadline_s=deadline)
         except ValueError:

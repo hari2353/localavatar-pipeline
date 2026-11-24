@@ -4,6 +4,7 @@ Cross-pollinated from harvard-edge/AVPerf: run named scenarios, record
 latency and failures, and report the fraction that completed both correctly
 and inside the deadline ("safe end-to-end processing rate").
 """
+
 from __future__ import annotations
 
 import time
@@ -43,9 +44,9 @@ def run_scenarios(
             run()
         except Exception as exc:  # a failed render is a scenario failure
             latency = clock() - started
-            results.append(ScenarioResult(
-                name, round(latency, 4), False, False, f"error: {exc}"
-            ))
+            results.append(
+                ScenarioResult(name, round(latency, 4), False, False, f"error: {exc}")
+            )
             continue
         latency = clock() - started
         success = True
@@ -60,11 +61,17 @@ def run_scenarios(
         "safe_rate": round(safe / len(results), 4),
         "failures": [
             {"name": r.name, "latency_s": r.latency_s, "detail": r.detail}
-            for r in results if not r.safe
+            for r in results
+            if not r.safe
         ][:_MAX_FAILURES],
         "scenarios": [
-            {"name": r.name, "latency_s": r.latency_s,
-             "success": r.success, "safe": r.safe, "detail": r.detail}
+            {
+                "name": r.name,
+                "latency_s": r.latency_s,
+                "success": r.success,
+                "safe": r.safe,
+                "detail": r.detail,
+            }
             for r in results
         ],
     }

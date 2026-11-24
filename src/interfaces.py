@@ -1,4 +1,5 @@
 """SOLID ABCs. Heavy deps must be imported inside methods, never at top."""
+
 import abc
 from dataclasses import dataclass
 from pathlib import Path
@@ -25,42 +26,54 @@ class VideoClip:
 
 class IScriptProvider(abc.ABC):
     name: str
+
     @abc.abstractmethod
     def generate(self, niche: str, minutes: int, seed: int) -> Script: ...
 
 
 class ITTSProvider(abc.ABC):
     name: str
+
     @abc.abstractmethod
-    def synthesize(self, script: Script, out_wav: Path, voice_id: str = "") -> AudioTrack: ...
+    def synthesize(
+        self, script: Script, out_wav: Path, voice_id: str = ""
+    ) -> AudioTrack: ...
 
 
 class IAvatarMaker(abc.ABC):
     """Generates the host face PNG (user can also supply their own file)."""
+
     name: str
+
     @abc.abstractmethod
     def ensure(self, out_png: Path, seed: int = 42) -> Path: ...
 
 
 class IAvatarRenderer(abc.ABC):
     name: str
+
     @abc.abstractmethod
     def render(self, image: Path, audio: AudioTrack, out_mp4: Path) -> VideoClip: ...
 
 
 class IBrollProvider(abc.ABC):
     name: str
+
     @abc.abstractmethod
     def generate(self, script: Script, out_dir: Path) -> list: ...
 
 
 class IQualityGate(abc.ABC):
     name: str
+
     @abc.abstractmethod
     def review(self, clip: VideoClip) -> bool: ...
 
 
 class ICompositor(abc.ABC):
     name: str
+
     @abc.abstractmethod
-    def compose(self, avatar: VideoClip, audio: AudioTrack, broll: list, out_mp4: Path) -> VideoClip: ...
+    def compose(
+        self, avatar: VideoClip, audio: AudioTrack, broll: list, out_mp4: Path
+    ) -> VideoClip: ...

@@ -1,4 +1,5 @@
 """Unit: flag loading + validation in isolation (no pipeline)."""
+
 import copy
 from pathlib import Path
 

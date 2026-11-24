@@ -1,4 +1,5 @@
 """Shared harness fixtures: every test runs in an isolated cwd so the repo tree stays clean."""
+
 import pytest
 
 

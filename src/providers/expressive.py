@@ -1,6 +1,7 @@
 """Expressive tier: audio-driven faces (lip-sync / emotion). Heavy deps live in
 envs/musetalk + models/musetalk (both gitignored); this module only shells out,
 so the test harness never imports torch."""
+
 import os
 import subprocess
 from pathlib import Path
@@ -17,10 +18,16 @@ MT_UNET_CFG = MT / "models" / "musetalkV15" / "musetalk.json"
 
 class MuseTalkRenderer(IAvatarRenderer):
     """v1.5 lip-sync (expression score 1). 8GB-safe: fp16 + batch 4."""
+
     name = "musetalk"
 
-    def __init__(self, extra_margin: int = 10, parsing_mode: str = "jaw",
-                 batch_size: int = 4, bbox_shift: int = 0):
+    def __init__(
+        self,
+        extra_margin: int = 10,
+        parsing_mode: str = "jaw",
+        batch_size: int = 4,
+        bbox_shift: int = 0,
+    ):
         self.extra_margin = extra_margin
         self.parsing_mode = parsing_mode
         self.batch_size = batch_size
@@ -32,7 +39,8 @@ class MuseTalkRenderer(IAvatarRenderer):
             raise RuntimeError(
                 "MuseTalk not ready, missing: "
                 + ", ".join(str(p) for p in missing)
-                + " (build envs/musetalk, download weights per tasks/plan.md T4a)")
+                + " (build envs/musetalk, download weights per tasks/plan.md T4a)"
+            )
 
     def render(self, image: Path, audio: AudioTrack, out_mp4: Path) -> VideoClip:
         self._check()
@@ -44,31 +52,81 @@ class MuseTalkRenderer(IAvatarRenderer):
         work.mkdir(parents=True, exist_ok=True)
         dur = max(2.0, audio.duration_s)
         still = work / "still.mp4"
-        r = subprocess.run(["ffmpeg", "-y", "-loop", "1", "-framerate", "25",
-                            "-i", str(image), "-t", f"{dur:.1f}",
-                            "-c:v", "libx264", "-preset", "ultrafast",
-                            "-pix_fmt", "yuv420p", str(still)],
-                           capture_output=True, text=True, timeout=600)
+        r = subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-loop",
+                "1",
+                "-framerate",
+                "25",
+                "-i",
+                str(image),
+                "-t",
+                f"{dur:.1f}",
+                "-c:v",
+                "libx264",
+                "-preset",
+                "ultrafast",
+                "-pix_fmt",
+                "yuv420p",
+                str(still),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=600,
+        )
         if r.returncode != 0:
             raise RuntimeError(f"still-video build failed: {r.stderr[-400:]}")
         cfg = work / "task.yaml"
-        cfg.write_text(f"task_0:\n  video_path: \"{still.as_posix()}\"\n"
-                       f"  audio_path: \"{wav.as_posix()}\"\n", encoding="utf-8")
+        cfg.write_text(
+            f'task_0:\n  video_path: "{still.as_posix()}"\n'
+            f'  audio_path: "{wav.as_posix()}"\n',
+            encoding="utf-8",
+        )
         res = work / "results"
-        cmd = [str(MT_ENV_PY), "-m", "scripts.inference",
-               "--inference_config", str(cfg), "--result_dir", str(res),
-               "--unet_model_path", str(MT_UNET), "--unet_config", str(MT_UNET_CFG),
-               "--version", "v15", "--use_float16", "--batch_size", str(self.batch_size),
-               "--fps", "25", "--output_vid_name", "lip.mp4",
-               "--extra_margin", str(self.extra_margin),
-               "--parsing_mode", self.parsing_mode,
-               "--bbox_shift", str(self.bbox_shift)]
+        cmd = [
+            str(MT_ENV_PY),
+            "-m",
+            "scripts.inference",
+            "--inference_config",
+            str(cfg),
+            "--result_dir",
+            str(res),
+            "--unet_model_path",
+            str(MT_UNET),
+            "--unet_config",
+            str(MT_UNET_CFG),
+            "--version",
+            "v15",
+            "--use_float16",
+            "--batch_size",
+            str(self.batch_size),
+            "--fps",
+            "25",
+            "--output_vid_name",
+            "lip.mp4",
+            "--extra_margin",
+            str(self.extra_margin),
+            "--parsing_mode",
+            self.parsing_mode,
+            "--bbox_shift",
+            str(self.bbox_shift),
+        ]
         env = dict(os.environ)
         env["PYTHONPATH"] = str(VENDOR) + os.pathsep + env.get("PYTHONPATH", "")
         env["PYTHONUTF8"] = "1"
         env["PYTHONIOENCODING"] = "utf-8"
-        r = subprocess.run(cmd, cwd=str(MT), capture_output=True, text=True, timeout=3600, env=env,
-                           encoding="utf-8", errors="replace")
+        r = subprocess.run(
+            cmd,
+            cwd=str(MT),
+            capture_output=True,
+            text=True,
+            timeout=3600,
+            env=env,
+            encoding="utf-8",
+            errors="replace",
+        )
         cand = res / "lip.mp4"
         if r.returncode != 0 or not cand.exists():
             found = sorted(res.rglob("*.mp4"))
@@ -76,16 +134,46 @@ class MuseTalkRenderer(IAvatarRenderer):
                 raise RuntimeError(f"MuseTalk inference failed: {r.stderr[-800:]}")
             cand = found[0]
         # ensure narration audio present
-        probe = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "a",
-                                "-show_entries", "stream=codec_name", "-of", "csv=p=0",
-                                str(cand)], capture_output=True, text=True)
+        probe = subprocess.run(
+            [
+                "ffprobe",
+                "-v",
+                "error",
+                "-select_streams",
+                "a",
+                "-show_entries",
+                "stream=codec_name",
+                "-of",
+                "csv=p=0",
+                str(cand),
+            ],
+            capture_output=True,
+            text=True,
+        )
         if not probe.stdout.strip():
             muxed = work / "muxed.mp4"
-            m = subprocess.run(["ffmpeg", "-y", "-i", str(cand), "-i", str(wav),
-                                "-c:v", "copy", "-c:a", "aac", "-shortest", str(muxed)],
-                               capture_output=True, text=True, timeout=600)
+            m = subprocess.run(
+                [
+                    "ffmpeg",
+                    "-y",
+                    "-i",
+                    str(cand),
+                    "-i",
+                    str(wav),
+                    "-c:v",
+                    "copy",
+                    "-c:a",
+                    "aac",
+                    "-shortest",
+                    str(muxed),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=600,
+            )
             if m.returncode == 0:
                 cand = muxed
         import shutil
+
         shutil.copyfile(cand, out_mp4)
         return VideoClip(mp4_path=out_mp4, duration_s=dur)

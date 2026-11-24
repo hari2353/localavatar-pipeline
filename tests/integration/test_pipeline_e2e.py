@@ -1,4 +1,5 @@
 """Integration: full pipeline end-to-end on mocks (CPU-only, no downloads)."""
+
 from pathlib import Path
 
 import yaml
@@ -46,6 +47,7 @@ def test_missing_host_face_is_auto_created(tmp_path):
 
 def test_strict_avatar_maker_fails_loudly(tmp_path):
     import pytest
+
     cfg = load_example()
     cfg["out_dir"] = str(tmp_path / "out")
     cfg["engines"]["avatar_maker"] = "none"

@@ -23,7 +23,9 @@ def load_example():
 # ── brand + thumbnail ────────────────────────────────────────────────────────
 def test_brand_clamps_colors_and_bounds() -> None:
     brand = Brand(handle="@cha", accent="GGGGGG", title_scale=99)
-    assert brand.accent == "#000000" or brand.accent.startswith("#")  # never crashes on bad hex
+    assert brand.accent == "#000000" or brand.accent.startswith(
+        "#"
+    )  # never crashes on bad hex
     assert 0.5 <= brand.title_scale <= 3.0
 
 
@@ -36,7 +38,9 @@ def test_thumbnail_is_real_bounded_image_with_brand(tmp_path: Path) -> None:
 
     Image.new("RGB", (640, 360), (30, 30, 30)).save(host)
     out = make_thumbnail(
-        host, "5 facts about Rust", tmp_path / "thumb.jpg",
+        host,
+        "5 facts about Rust",
+        tmp_path / "thumb.jpg",
         Brand(handle="@chatters", accent="#00ff88"),
     )
     with Image.open(out) as image:
@@ -47,10 +51,11 @@ def test_burn_subtitles_mock_fallback_keeps_timing(tmp_path: Path) -> None:
     final = tmp_path / "final.mp4"
     final.write_bytes(b"video-bytes")
     srt = tmp_path / "subs.srt"
-    srt.write_text(
-        "1\n00:00:00,000 --> 00:00:02,000\nhello world\n", encoding="utf-8")
+    srt.write_text("1\n00:00:00,000 --> 00:00:02,000\nhello world\n", encoding="utf-8")
     out = burn_subtitles(final, srt, tmp_path / "final_burned.mp4")
-    assert out.exists() and out.read_bytes() == final.read_bytes()  # mock: copy keeps A/V
+    assert (
+        out.exists() and out.read_bytes() == final.read_bytes()
+    )  # mock: copy keeps A/V
 
 
 # ── pipeline wiring (flag-gated) ─────────────────────────────────────────────
@@ -80,13 +85,19 @@ def test_post_flags_on_produce_burned_and_thumbnail(tmp_path: Path) -> None:
     assert meta["brand"]["handle"] == "@chatters"
 
 
-def test_retry_loop_varies_seed_and_reports_attempts(tmp_path: Path, monkeypatch) -> None:
+def test_retry_loop_varies_seed_and_reports_attempts(
+    tmp_path: Path, monkeypatch
+) -> None:
     from src.providers import mock as m
     from src import factory
 
     cfg = load_example()
     cfg["out_dir"] = str(tmp_path / "out")
-    cfg["vlm_quality_gate"] = {"enabled": True, "model": "minicpm-v-2b", "max_attempts": 3}
+    cfg["vlm_quality_gate"] = {
+        "enabled": True,
+        "model": "minicpm-v-2b",
+        "max_attempts": 3,
+    }
 
     seen_seeds: list[int] = []
 
@@ -117,7 +128,11 @@ def test_retry_exhaustion_is_honest(tmp_path: Path, monkeypatch) -> None:
 
     cfg = load_example()
     cfg["out_dir"] = str(tmp_path / "out")
-    cfg["vlm_quality_gate"] = {"enabled": True, "model": "minicpm-v-2b", "max_attempts": 2}
+    cfg["vlm_quality_gate"] = {
+        "enabled": True,
+        "model": "minicpm-v-2b",
+        "max_attempts": 2,
+    }
 
     class AlwaysFail:
         def review(self, clip) -> bool:

@@ -3,6 +3,7 @@
 Sources REAL facial geometry from the vendored face_detection shim (MediaPipe)
 and presents it as wholebody-133 keypoints. MuseTalk reads keypoints[0][23:91].
 """
+
 import numpy as np
 
 N_TOTAL = 133
@@ -11,6 +12,7 @@ FACE_LO, FACE_HI = 23, 91  # wholebody-133 facial slice used by MuseTalk
 
 def init_model(config_file=None, checkpoint_file=None, device="cpu"):
     from face_detection import FaceAlignment, LandmarksType
+
     fa = FaceAlignment(LandmarksType._2D, flip_input=False, device=device)
     return {"fa": fa}
 

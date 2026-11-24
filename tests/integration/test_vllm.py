@@ -3,6 +3,7 @@
 Capable-machine path: `vllm serve <model>` on Linux, then
 LAP_VLLM_URL=http://host:8000/v1/chat/completions pytest tests/integration/test_vllm.py
 """
+
 import os
 
 import pytest
@@ -12,6 +13,7 @@ from src.providers.studio import VLLMScriptProvider
 
 def _server_up():
     import urllib.request
+
     url = os.environ.get("LAP_VLLM_URL", "http://localhost:8000/v1/chat/completions")
     base = url.rsplit("/v1/", 1)[0] + "/v1/models"
     try:

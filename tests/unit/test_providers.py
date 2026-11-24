@@ -1,16 +1,31 @@
 """Unit: each mock provider satisfies its ABC contract in isolation."""
+
 from pathlib import Path
 
 import pytest
 
-from src.interfaces import (AudioTrack, IAvatarMaker, IAvatarRenderer, IBrollProvider,
-                            IQualityGate, IScriptProvider, ITTSProvider, Script, VideoClip)
+from src.interfaces import (
+    AudioTrack,
+    IAvatarMaker,
+    IAvatarRenderer,
+    IBrollProvider,
+    IQualityGate,
+    IScriptProvider,
+    ITTSProvider,
+    Script,
+    VideoClip,
+)
 from src.providers import mock as m
 
 
 def test_mock_script_shape():
     s = m.MockScript().generate("tech facts", minutes=3, seed=1)
-    assert isinstance(s, Script) and s.title and len(s.sections) == 3 and len(s.full_text) > 100
+    assert (
+        isinstance(s, Script)
+        and s.title
+        and len(s.sections) == 3
+        and len(s.full_text) > 100
+    )
 
 
 def test_mock_tts_writes_wav(tmp_path):
@@ -20,7 +35,9 @@ def test_mock_tts_writes_wav(tmp_path):
 
 
 def test_mock_avatar_writes_mp4(tmp_path):
-    c = m.MockAvatar().render(Path("x.png"), AudioTrack(Path("a.wav"), 3.0), tmp_path / "a.mp4")
+    c = m.MockAvatar().render(
+        Path("x.png"), AudioTrack(Path("a.wav"), 3.0), tmp_path / "a.mp4"
+    )
     assert isinstance(c, VideoClip) and c.mp4_path.exists()
 
 

@@ -1,4 +1,5 @@
 """Unit: studio tier providers (real local media, kept FAST for the harness)."""
+
 import shutil
 from pathlib import Path
 
@@ -21,6 +22,7 @@ def test_sapi_speaks_short_line(tmp_path):
     if not shutil.which("powershell") or not shutil.which("ffprobe"):
         pytest.skip("Windows SAPI/ffprobe unavailable on this platform")
     from src.interfaces import Script
+
     sc = Script(title="t", sections=["body"], full_text="Hello. This is a voice test.")
     a = s.SapiTTSProvider().synthesize(sc, tmp_path / "v.wav")
     assert a.wav_path.exists() and a.duration_s > 1.0
@@ -33,7 +35,10 @@ def test_piper_speaks_short_line(tmp_path):
     if not (repo_root / "voices" / "piper" / "en_US-lessac-medium.onnx").exists():
         pytest.skip("piper voice model absent (local-only)")
     from src.interfaces import Script
-    sc = Script(title="t", sections=["body"], full_text="Hello. This is the piper voice test.")
+
+    sc = Script(
+        title="t", sections=["body"], full_text="Hello. This is the piper voice test."
+    )
     a = s.PiperTTSProvider().synthesize(sc, tmp_path / "p.wav")
     assert a.wav_path.exists() and a.duration_s > 1.0
 
@@ -44,6 +49,7 @@ def test_piper_wired_in_factory():
 
 def test_pillow_face_png(tmp_path):
     from PIL import Image
+
     p = s.PillowFaceMaker().ensure(tmp_path / "host.png", seed=3)
     assert Image.open(p).size == (1280, 720)
 
@@ -52,14 +58,16 @@ def test_slideshow_renders_real_mp4(tmp_path):
     if not shutil.which("ffmpeg"):
         pytest.skip("ffmpeg not on PATH")
     from src.interfaces import AudioTrack, Script
+
     sc = Script(title="t", sections=["body"], full_text="Hello world.")
     face = s.PillowFaceMaker().ensure(tmp_path / "host.png")
     repo_root = Path(__file__).resolve().parents[2]
     sapi_ok = bool(shutil.which("powershell"))
     # PiperTTSProvider needs the piper binary on PATH plus its voice model.
-    piper_ok = bool(shutil.which("piper")) and (
-        repo_root / "voices" / "piper" / "en_US-lessac-medium.onnx"
-    ).exists()
+    piper_ok = (
+        bool(shutil.which("piper"))
+        and (repo_root / "voices" / "piper" / "en_US-lessac-medium.onnx").exists()
+    )
     if not sapi_ok and not piper_ok:
         pytest.skip("no narration back end (SAPI or piper) available on this machine")
     tts = s.SapiTTSProvider() if sapi_ok else s.PiperTTSProvider()
@@ -75,6 +83,7 @@ def test_slideshow_renders_real_mp4(tmp_path):
 
 def test_srt_writer_splits_duration(tmp_path):
     from src.interfaces import Script
+
     sc = Script(title="t", sections=["body"], full_text=" ".join(["word"] * 90))
     p = s.write_srt(sc, 90.0, tmp_path / "s.srt")
     txt = p.read_text(encoding="utf-8")
@@ -82,14 +91,25 @@ def test_srt_writer_splits_duration(tmp_path):
 
 
 def test_compositor_auto_select():
-    eng_mock = {"script_provider": "mock", "tts_provider": "mock",
-                "avatar_renderer": "mock", "avatar_maker": "mock",
-                "broll_provider": "none", "enhancer": "none"}
+    eng_mock = {
+        "script_provider": "mock",
+        "tts_provider": "mock",
+        "avatar_renderer": "mock",
+        "avatar_maker": "mock",
+        "broll_provider": "none",
+        "enhancer": "none",
+    }
     eng_studio = dict(eng_mock, tts_provider="sapi")
-    eng_new = {"script_provider": "ollama_qwen", "tts_provider": "piper",
-               "avatar_renderer": "musetalk", "avatar_maker": "none",
-               "broll_provider": "none", "enhancer": "none"}
+    eng_new = {
+        "script_provider": "ollama_qwen",
+        "tts_provider": "piper",
+        "avatar_renderer": "musetalk",
+        "avatar_maker": "none",
+        "broll_provider": "none",
+        "enhancer": "none",
+    }
     from src.providers import mock as m
+
     assert isinstance(factory.make_compositor(eng_mock), m.MockCompositor)
     assert isinstance(factory.make_compositor(eng_studio), s.CopyCompositor)
     # regression: every real engine flag must yield real output, never mock bytes
@@ -103,8 +123,9 @@ def test_ollama_prompt_shape():
 
 
 def test_ollama_wired_in_factory():
-    assert isinstance(factory.make_script_provider("ollama_qwen"),
-                      s.OllamaScriptProvider)
+    assert isinstance(
+        factory.make_script_provider("ollama_qwen"), s.OllamaScriptProvider
+    )
 
 
 def test_vllm_payload_shape_and_wiring():

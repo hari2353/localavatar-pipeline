@@ -6,6 +6,7 @@ Brand colors are clamped to safe hex and the thumbnail is a bounded
 1280x720 YouTube-ready frame. The mock/CI path copies bytes (deterministic);
 the real path shells to ffmpeg with the SRT burned in.
 """
+
 from __future__ import annotations
 
 import shutil
@@ -28,7 +29,9 @@ class Brand:
 
     def __post_init__(self) -> None:
         self.accent = self._clamp_hex(self.accent)
-        self.title_scale = max(_MIN_TITLE_SCALE, min(_MAX_TITLE_SCALE, float(self.title_scale)))
+        self.title_scale = max(
+            _MIN_TITLE_SCALE, min(_MAX_TITLE_SCALE, float(self.title_scale))
+        )
 
     @staticmethod
     def _clamp_hex(value: str) -> str:
@@ -61,13 +64,26 @@ def burn_subtitles(video: Path, srt: Path, out: Path, *, font_size: int = 48) ->
         return out
     escaped = str(srt).replace("\\", "\\\\").replace(":", "\\:").replace("'", "\\'")
     subprocess.run(
-        ["ffmpeg", "-y", "-i", str(video), "-vf",
-         f"subtitles={escaped}:force_style='FontSize={font_size}'", "-c:a", "copy", str(out)],
-        check=True, capture_output=True)
+        [
+            "ffmpeg",
+            "-y",
+            "-i",
+            str(video),
+            "-vf",
+            f"subtitles={escaped}:force_style='FontSize={font_size}'",
+            "-c:a",
+            "copy",
+            str(out),
+        ],
+        check=True,
+        capture_output=True,
+    )
     return out
 
 
-def make_thumbnail(host_png: Path, title: str, out: Path, brand: Brand | None = None) -> Path:
+def make_thumbnail(
+    host_png: Path, title: str, out: Path, brand: Brand | None = None
+) -> Path:
     """1280x720 thumbnail: the host frame, an accent bar, the handle and the
     (wrapped, bounded) episode title. Pillow-only, CPU, deterministic."""
     from PIL import Image, ImageDraw, ImageFont
@@ -84,10 +100,12 @@ def make_thumbnail(host_png: Path, title: str, out: Path, brand: Brand | None = 
     except Exception:  # placeholder/mock host bytes: brand card without a face
         pass
     draw = ImageDraw.Draw(canvas)
-    rgb = tuple(int(brand.accent[i:i + 2], 16) for i in (1, 3, 5))
+    rgb = tuple(int(brand.accent[i : i + 2], 16) for i in (1, 3, 5))
     draw.rectangle([0, height - 24, width, height], fill=rgb)
     if brand.handle:
-        draw.text((width - 24, height - 56), brand.handle, fill=(240, 240, 240), anchor="ra")
+        draw.text(
+            (width - 24, height - 56), brand.handle, fill=(240, 240, 240), anchor="ra"
+        )
     size = max(28, min(72, int(48 * brand.title_scale)))
     try:
         font: ImageFont.ImageFont | None = ImageFont.load_default(size)
