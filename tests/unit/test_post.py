@@ -6,7 +6,6 @@ byte-identical to today."""
 
 from pathlib import Path
 
-import pytest
 import yaml
 
 from src.pipeline import run

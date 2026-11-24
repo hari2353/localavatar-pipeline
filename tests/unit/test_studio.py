@@ -57,7 +57,7 @@ def test_pillow_face_png(tmp_path):
 def test_slideshow_renders_real_mp4(tmp_path):
     if not shutil.which("ffmpeg"):
         pytest.skip("ffmpeg not on PATH")
-    from src.interfaces import AudioTrack, Script
+    from src.interfaces import Script
 
     sc = Script(title="t", sections=["body"], full_text="Hello world.")
     face = s.PillowFaceMaker().ensure(tmp_path / "host.png")

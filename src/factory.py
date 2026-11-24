@@ -1,7 +1,5 @@
 """Factory: flag -> provider instance. Real engines lazy-import here (T2-T6 fill them)."""
 
-from .interfaces import IBrollProvider
-
 
 def make_script_provider(flag: str):
     from .providers import mock as m, studio as s

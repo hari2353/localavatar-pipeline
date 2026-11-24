@@ -242,7 +242,6 @@ class PiperTTSProvider(ITTSProvider):
     def synthesize(
         self, script: Script, out_wav: Path, voice_id: str = ""
     ) -> AudioTrack:
-        import sys
 
         ROOT = Path(__file__).resolve().parents[2]
         vdir = ROOT / "voices" / "piper"

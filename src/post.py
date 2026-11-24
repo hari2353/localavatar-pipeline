@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 HEX_ALPHABET = set("0123456789abcdefABCDEF")
